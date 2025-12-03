@@ -1,0 +1,9 @@
+{% load static %}
+
+<div class="comments-wrapper">
+    {% for comment in comments %}
+        {% include "core/comments_recursive.html" with comments=comment %}
+    {% empty %}
+        <p class="text-muted">No comments yet. Be the first to comment.</p>
+    {% endfor %}
+</div>

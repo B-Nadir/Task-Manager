@@ -1,0 +1,71 @@
+{% extends "core/base.html" %}
+{% block content %}
+
+<div class="mt-4 space-y-6">
+
+  <!-- Page Header -->
+  <div class="flex justify-between items-center">
+    <div>
+      <h2 class="text-3xl font-bold text-dark font-serif">Tag Master</h2>
+      <p class="text-sm text-dark/70">Create and manage tags</p>
+    </div>
+    <a href="{% url 'create_tag' %}"
+      class="px-4 py-2 bg-primary text-grey rounded-lg hover:bg-dark transition shadow">
+      Add Tag
+    </a>
+  </div>
+
+  <!-- Tag Table -->
+  <div class="bg-light rounded-xl border border-soft shadow-lg overflow-hidden">
+    <table class="w-full text-sm">
+      <thead class="bg-soft">
+        <tr>
+          <th class="p-3 text-left">Tag</th>
+          <th class="p-3 text-center">Color</th>
+          <th class="p-3 text-center">Tasks Count</th>
+          <th class="p-3 text-center">Created</th>
+          <th class="p-3 text-right">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for tag in tags %}
+        <tr class="border-b  border-soft hover:bg-soft/40 transition">
+          <!-- Tag Name -->
+          <td class="p-3">{{ tag.name }}</td>
+
+          <!-- Tag Color -->
+          <td class="p-3 text-center">
+            <span class="px-2 py-1 text-xs font-bold rounded-full text-grey"
+                  style="background-color: {{ tag.color }};text-shadow: 0 0 5px dark;">
+              {{ tag.color }}
+            </span>
+          </td>
+
+          <!-- Task Count -->
+          <td class="p-3 text-center">{{ tag.task_set.count }}</td>
+
+          <!-- Created -->
+          <td class="p-3 text-center">{{ tag.created_at|date:"d M Y" }}</td>
+
+          <!-- Action Buttons -->
+          <td class="p-3 text-right space-x-2">
+            <a href="{% url 'edit_tag' tag.id %}"
+              class="px-3 py-1 bg-accent text-grey rounded hover:bg-dark text-xs">Edit</a>
+            <a href="{% url 'delete_tag' tag.id %}"
+              class="px-3 py-1 bg-danger text-grey rounded hover:bg-dark text-xs"
+              onclick="return confirm('Are you sure you want to delete this tag?');">Delete</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" class="p-4 text-center text-dark/50">No tags found.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+{% endblock %}

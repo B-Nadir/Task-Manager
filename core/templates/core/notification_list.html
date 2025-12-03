@@ -1,0 +1,128 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% block content %}
+
+<div class="space-y-6 mt-4">
+
+    <!-- Page Title -->
+    <div class="flex justify-between items-center">
+        <div>
+            <h2 class="text-3xl font-serif font-bold text-dark">Notifications</h2>
+            <p class="text-sm text-dark/60">Manage your alerts</p>
+        </div>
+
+        {% if notifications_unread > 0 %}
+        <a href="{% url 'mark_all_notifications_read' %}"
+           class="px-4 py-2 bg-primary text-grey rounded-lg hover:bg-dark transition shadow text-sm">
+            Mark All Read ({{ notifications_unread }})
+        </a>
+        {% endif %}
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-light border border-soft rounded-xl shadow-lg p-4 mt-4">
+        <form method="get" class="space-y-3">
+
+          <!-- Status Filter -->
+          <div class="grid grid-cols-1 md:grid-cols-6 gap-3">
+              <input
+                name="search"
+                value="{{ search_query }}"
+                placeholder="Search..."
+                class="col-span-1 md:col-span-1 px-4 py-2 rounded-lg border border-soft focus:outline-none focus:ring-2 focus:ring-primary/30"
+              />
+              <select name="status" class="col-span-1 md:col-span-1 px-4 py-2 rounded-lg border border-soft focus:outline-none focus:ring-2 focus:ring-primary/30">
+                  <option value="">Select Status</option>
+                  <option value="unread" {% if status_filter == "unread" %}selected{% endif %}>Unread</option>
+                  <option value="read" {% if status_filter == "read" %}selected{% endif %}>Read</option>
+              </select>
+            
+            <!-- Category Filter -->
+            <select name="category" class="col-span-1 md:col-span-1 px-4 py-2 rounded-lg border border-soft focus:outline-none focus:ring-2 focus:ring-primary/30">
+                <option value="">All Categories</option>
+                <option value="task" {% if category_filter == "task" %}selected{% endif %}>Task</option>
+                <option value="complaint" {% if category_filter == "complaint" %}selected{% endif %}>Complaint</option>
+                <option value="reminder" {% if category_filter == "reminder" %}selected{% endif %}>Reminder</option>
+                <option value="system" {% if category_filter == "system" %}selected{% endif %}>System</option>
+            </select>
+
+            <!-- Date From -->
+            <input type="date" placeholder="From" name="start_date" value="{{ start_date }}"
+                    class="col-span-1 md:col-span-1 px-4 py-2 rounded-lg border border-soft focus:outline-none focus:ring-2 focus:ring-primary/30" />
+
+            <!-- Date To -->
+            <input type="date" placeholder="To" name="end_date" value="{{ end_date }}"
+                    class="col-span-1 md:col-span-1 px-4 py-2 rounded-lg border border-soft focus:outline-none focus:ring-2 focus:ring-primary/30" />
+
+            <!-- Submit -->
+            <button type="submit"
+                    class="col-span-1 md:col-span-1 px-4 py-2 bg-primary text-grey rounded-lg hover:bg-dark transition">
+                Apply Filters
+            </button>
+          </div>
+        </form>
+    </div>
+
+    <!-- Notifications List -->
+    <div class="bg-light border border-soft rounded-xl shadow-lg overflow-hidden">
+        {% if notifications %}
+            {% for n in notifications %}
+                <div class="px-4 py-3 border-b border-soft flex justify-between items-center
+                    {% if not n.is_read %}bg-light{% endif %}">
+
+                    <!-- Message -->
+                    <div>
+                        <p class="text-sm">
+                            {% if "Task" in n.message %}
+                                <strong>{{ n.message }}</strong>
+                            {% elif "Complaint" in n.message %}
+                                <strong>{{ n.message }}</strong>
+                            {% elif "Reminder" in n.message %}
+                                <strong>{{ n.message }}</strong>
+                            {% else %}
+                                {{ n.message }}
+                            {% endif %}
+                        </p>
+                        <p class="text-xs text-dark/60">{{ n.created_at|date:"d M Y, H:i" }}</p>
+                    </div>
+
+                    <!-- Buttons -->
+                    {% if not n.is_read %}
+                        <form method="post" action="{% url 'mark_notification_read' n.id %}">
+                            {% csrf_token %}
+                            <button class="px-3 py-1 text-xs bg-primary text-grey rounded hover:bg-dark transition">
+                                Mark Read
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <!-- Pagination -->
+            <div class="p-3 text-center">
+                {% if notifications.has_previous %}
+                    <a href="?page={{ notifications.previous_page_number }}"
+                       class="px-3 py-1 bg-soft rounded hover:bg-light">Prev</a>
+                {% endif %}
+                <span class="mx-3 text-sm">Page {{ notifications.number|default:"1" }} of {{ notifications.paginator.num_pages|default:"1" }}</span>
+                {% if notifications.has_next %}
+                    <a href="?page={{ notifications.next_page_number }}"
+                       class="px-3 py-1 bg-soft rounded hover:bg-light">Next</a>
+                {% endif %}
+            </div>
+
+        {% else %}
+            <p class="text-center px-4 py-3 text-dark/60">No notifications found.</p>
+        {% endif %}
+    </div>
+
+</div>
+
+<audio id="notifSound" src="{% static 'core/sound/notification.mp3' %}" preload="auto"></audio>
+<script>
+{% if notifications_unread > 0 %}
+    document.getElementById("notifSound").play().catch(()=>{});
+{% endif %}
+</script>
+
+{% endblock %}

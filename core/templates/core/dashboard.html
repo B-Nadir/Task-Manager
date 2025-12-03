@@ -1,0 +1,133 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% block content %}
+
+<div class="space-y-6 mt-4">
+    <!-- Page Title -->
+    <div class="mb-6">
+        <h1 class="text-3xl font-serif font-bold text-dark">Dashboard</h1>
+        <p class="text-dark opacity-70 text-sm">Overview & quick insights</p>
+    </div>
+
+    <!-- KPI Columns -->
+   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- COLUMN 1: TASK OVERVIEW -->
+        <div class="bg-light border border-soft shadow-lg rounded-xl p-6 hover:shadow-xl hover:scale-[1.02] hover:border-primary transition">
+            <div class="space-y-3">
+                <!-- Total Tasks -->
+                <div class="bg-light border border-soft shadow-lg rounded-xl p-5 hover:shadow-xl hover:scale-[1.02] hover:border-primary transition">
+                    <div class="text-lg font-sans-serif font-bold text-dark text-center">
+                        Total Tasks
+                    </div>
+                    <div class="mt-1 text-xl font-sans-serif font-bold text-center text-accent">
+                        {{ total_tasks|default:0 }}
+                    </div>
+                </div>
+
+                <!-- Completed Tasks -->
+                <div class="bg-light border border-soft shadow-lg rounded-xl p-5 hover:shadow-xl hover:scale-[1.02] hover:border-primary transition">
+                    <div class="text-lg font-sans-serif font-bold text-dark text-center">
+                        Completed Tasks
+                    </div>
+                    <div class="mt-1 text-xl font-sans-serif font-bold text-center text-accent">
+                        {{ completed_tasks|default:0 }}
+                    </div>
+                </div>
+
+                <!-- Pending Tasks -->
+                <div class="bg-light border border-soft shadow-lg rounded-xl p-5 hover:shadow-xl hover:scale-[1.02] hover:border-primary transition">
+                    <div class="text-lg font-sans-serif font-bold text-dark text-center">
+                        Pending Tasks
+                    </div>
+                    <div class="mt-1 text-xl font-sans-serif font-bold text-center text-danger">
+                        {{ pending_tasks|default:0 }}
+                    </div>
+                </div>
+            </div>
+
+            <a href="{% url 'task_list' %}" class="block text-right text-primary text-base font-medium mt-4 hover:underline">
+                View ›
+            </a>
+        </div>
+
+        <!-- COLUMN 2: COMPLAINT OVERVIEW -->
+        <div class="bg-light border border-soft shadow-lg rounded-xl p-6 hover:shadow-xl hover:scale-[1.02] hover:border-primary transition">
+            <div class="space-y-3">
+                <!-- Total Complaints -->
+                <div class="bg-light border border-soft shadow-lg rounded-xl p-5 hover:shadow-xl hover:scale-[1.02] hover:border-primary transition">
+                    <div class="text-lg font-sans-serif font-bold text-dark text-center">
+                        Total Complaints
+                    </div>
+                    <div class="mt-1 text-xl font-sans-serif font-bold text-center text-accent">
+                        {{ total_complaints|default:0 }}
+                    </div>
+                </div>
+
+                <!-- Resolved Complaints -->
+                <div class="bg-light border border-soft shadow-lg rounded-xl p-5 hover:shadow-xl hover:scale-[1.02] hover:border-primary transition">
+                    <div class="text-lg font-sans-serif font-bold text-dark text-center">
+                        Resolved Complaints
+                    </div>
+                    <div class="mt-1 text-xl font-sans-serif font-bold text-center text-accent">
+                        {{ resolved_complaints|default:0 }}
+                    </div>
+                </div>
+
+                <!-- Pending Complaints -->
+                <div class="bg-light border border-soft shadow-lg rounded-xl p-5 hover:shadow-xl hover:scale-[1.02] hover:border-primary transition">
+                    <div class="text-lg font-sans-serif font-bold text-dark text-center">
+                        Pending Complaints
+                    </div>
+                    <div class="mt-1 text-xl font-sans-serif font-bold text-center text-danger">
+                        {{ pending_complaints|default:0 }}
+                    </div>
+                </div>
+            </div>
+
+            <a href="{% url 'complaint_list' %}" class="block text-right text-primary text-base font-medium mt-4 hover:underline">
+                View ›
+            </a>
+        </div>
+
+        <!-- COLUMN 3: PROGRESS OVERVIEW -->
+        <div class="bg-light border border-soft shadow-lg rounded-xl p-6 hover:shadow-xl hover:scale-[1.02] hover:border-primary transition">
+            <h3 class="text-lg font-sans-serif font-bold text-dark text-center mb-4">
+                Progress Overview
+            </h3>
+
+            <div class="flex justify-center items-center">
+                <div class="dual-progress shadow-lg rounded-full hover:scale-[1.05] transition relative">
+                    <svg width="230" height="230" viewBox="0 0 250 250"
+                        class="circular-progress outer"
+                        style="--final: {{ task_progress }}; --color: #0978c7ff;">
+                        <circle class="bg"></circle>
+                        <circle class="fg"></circle>
+                    </svg>
+
+                    <svg width="185" height="185" viewBox="0 0 200 200"
+                        class="circular-progress shadow-lg rounded-full inner absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                        style="--final: {{ complaint_progress }}; --color: #c9a75dff;">
+                        <circle class="bg"></circle>
+                        <circle class="fg"></circle>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="mt-4 text-base font-sans-serif text-dark text-center">
+                <div>
+                    <span class="inline-block w-4 h-4 rounded mr-1" style="background:#0978c7ff"></span>
+                    <strong id="taskCounter">0%</strong> — Task Progress
+                </div>
+                <div>
+                    <span class="inline-block w-4 h-4 rounded mr-1" style="background:#c9a75dff"></span>
+                    <strong id="complaintCounter">0%</strong> — Complaint Progress
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

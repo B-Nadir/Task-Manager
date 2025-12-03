@@ -1,0 +1,64 @@
+{% extends "core/base.html" %}
+{% block content %}
+<div class="max-w-3xl mx-auto mt-6">
+
+  <!-- Back Button -->
+  <a href="{% url 'tag_master' %}"
+     class="inline-block mb-4 px-4 py-2 rounded-lg bg-dark text-grey hover:bg-primary transition shadow">
+     ← Tag Master
+  </a>
+
+  <!-- Page Header -->
+  <div class="text-center mb-8">
+    <h2 class="text-3xl font-serif font-bold text-dark">{{ title|default:"Tag Form" }}</h2>
+    <p class="text-dark/70 text-sm">Create or update a tag</p>
+  </div>
+
+  <form method="post" class="space-y-6">
+    {% csrf_token %}
+
+    <!-- Tag Details -->
+    <div class="bg-light border border-soft rounded-xl shadow p-6 space-y-4">
+      <h3 class="font-serif text-lg font-bold text-center">Tag Details</h3>
+
+      <input type="text" name="{{ form.name.name }}" value="{{ form.name.value|default:'' }}"
+        placeholder="Tag Name"
+        class="w-full px-4 py-2 rounded-xl border border-soft bg-grey shadow-sm hover:bg-light/40 focus:border-primary focus:ring-2 focus:ring-primary/30 focus:outline-none">
+
+      <textarea name="{{ form.description.name }}" placeholder="Tag Description"
+        class="w-full px-4 py-2 rounded-xl border border-soft bg-grey resize-none min-h-[100px] shadow-sm hover:bg-light/40 focus:border-primary focus:ring-2 focus:ring-primary/30 focus:outline-none">{{ form.description.value|default:'' }}</textarea>
+      <h3 class="font-serif text-lg font-bold text-center">Tag Color</h3>
+
+      <div class="flex justify-center">
+        <input type="color" name="{{ form.color.name }}" value="{{ form.color.value|default:'#C9A75D' }}"
+          class="h-10 w-20 cursor-pointer rounded border border-soft shadow hover:ring-2 hover:ring-primary/30 transition" />
+      </div>
+    </div>
+
+    <!-- Submit -->
+    <div class="text-center pt-4">
+      <button type="submit"
+        class="px-6 py-2 bg-primary text-grey rounded-xl hover:bg-dark shadow-md transition">
+        {{ title|default:"Save" }}
+      </button>
+    </div>
+
+  </form>
+</div>
+
+<!-- Tailwind Styling -->
+<style>
+  input[type="text"],
+  textarea {
+    @apply w-full px-4 py-2 rounded-xl border border-soft bg-grey
+           shadow-sm hover:bg-light/40
+           focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30
+           transition;
+  }
+
+  textarea {
+    @apply resize-none min-h-[100px];
+  }
+</style>
+
+{% endblock %}

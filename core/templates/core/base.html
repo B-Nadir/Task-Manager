@@ -1,0 +1,615 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>{{ title|default:"Task Manager" }}</title>
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+<script>
+    tailwind.config = {
+    darkMode: 'class',
+    theme: {
+        extend: {
+        colors: {
+            primary: "var(--color-primary)",
+            dark: "var(--color-dark)",
+            light: "var(--color-light)",
+            accent: "var(--color-accent)",
+            soft: "var(--color-soft)",
+            danger: "var(--color-danger)",
+            grey: "var(--color-grey)",
+        },
+        fontFamily: {
+            serif: ['Cormorant Garamond', 'serif'],
+            sans: ['Poppins', 'sans-serif'],
+        },
+        },
+    },
+    }
+</script>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="icon" href="{% static 'core/img/logo.png' %}">
+</head>
+
+<body class="bg-light font-sans" data-sidebar="expanded">
+
+<style>
+:root {
+  --color-primary: rgb(201, 167, 93);
+  --color-dark: rgb(51, 50, 47);
+  --color-light: rgb(249, 247, 243);
+  --color-accent: rgb(24, 74, 120);
+  --color-soft: rgb(226, 203, 139);
+  --color-danger: rgb(212, 77, 91);
+  --color-grey: rgb(255, 255, 255);
+}
+
+body.theme-dark {
+  --color-primary: rgb(9, 120, 199);
+  --color-dark: rgb(197, 215, 241);
+  --color-light: rgb(30, 44, 58);
+  --color-accent: rgb(236, 207, 124);
+  --color-soft: rgb(41, 73, 97);
+  --color-danger: rgb(176, 58, 72);
+  --color-grey: rgb(36, 45, 54);
+}
+
+/* 🔄 Smooth transition */
+body {
+  background-color: var(--color-light);
+  color: var(--color-dark);
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+/* 🌒 Dark Mode */
+body.theme-dark {
+  background-color: var(--color-light);
+  color: var(--color-dark);
+}
+
+/* 📸 Background Overlay */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: url("{% static 'core/img/bgm.png' %}") center/cover no-repeat;
+  opacity: 0.2;
+  pointer-events: none;
+  z-index: -1;
+}
+
+body.theme-dark::before {
+  opacity: 0.2;
+}
+
+/* 🎬 Sun / Moon Animation */
+#iconSun, #iconMoon {
+  transition: opacity .4s ease, transform .3s ease;
+}
+
+.opacity-0 { opacity: 0 }
+.opacity-100 { opacity: 1 }
+.scale-75 { transform: scale(0.75) }
+.scale-100 { transform: scale(1) }
+
+/* 🔘 Circular Progress Indicator */
+.circular-progress {
+  --size: 150px;            /* default size (overridden below) */
+  --stroke-width: 15px;     /* default stroke width */
+  --radius: calc((var(--size) - var(--stroke-width)) / 2);
+  --circ: calc(var(--radius) * 3.14159 * 2);
+
+  /* Animation Values */
+  --p: 0;
+  --final: 100;             /* overridden inline using Django */
+
+  width: var(--size);
+  height: var(--size);
+  display: block;
+  animation: fill 2s ease-out forwards;
+}
+
+.circular-progress circle {
+  cx: 50%;
+  cy: 50%;
+  r: var(--radius);
+  stroke-width: var(--stroke-width);
+  fill: none;
+  stroke-linecap: round;
+}
+
+.circular-progress .bg {
+  stroke: #ddd;
+}
+
+.circular-progress .fg {
+  stroke: var(--color);
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+  stroke-dasharray: calc((var(--p) * var(--circ)) / 100) var(--circ);
+  transition: stroke-dasharray 0.2s linear;
+}
+
+/* Animation from 0 to final value */
+@keyframes fill {
+  from { --p: 0; }
+  to   { --p: var(--final); }
+}
+
+/* Outer Ring (Task Progress) */
+.circular-progress.outer {
+  --size: 250px;
+  --stroke-width: 18px;
+}
+
+/* Inner Ring (Complaint Progress) */
+.circular-progress.inner {
+  --size: 200px;
+  --stroke-width: 18px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Dual Ring Wrapper */
+.dual-progress {
+  position: relative;
+  display: inline-block;
+}
+
+/* Center Alignment */
+.progress-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Legend indicator */
+.legend-box {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 6px;
+  border-radius: 2px;
+}
+.notification-card {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 330px;
+    background: white;
+    border-radius: 10px;
+    border: 2px solid var(--soft);
+    display: flex;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    animation: slideIn 0.4s ease-out forwards;
+    z-index: 1000;
+    margin-top: 10px;
+}
+
+.notif-accent {
+    width: 8px;
+    border-radius: 10px 0 0 10px;
+}
+
+.notification-card.success .notif-accent { background: #1e802bff; }
+.notification-card.info .notif-accent { background: #007bff; }
+.notification-card.warning .notif-accent { background: #ff7b00ff; }
+.notification-card.error .notif-accent { background: var(--danger); }
+.notification-card.accent .notif-accent { background: var(--accent); }
+.notification-card.reminder .notif-accent { background: var(--soft); }
+
+.notif-content {
+    padding: 10px 14px;
+    flex: 1;
+}
+
+.notif-title {
+    font-weight: bold;
+    font-size: 15px;
+    color: black;
+}
+
+.notif-message {
+    font-size: 14px;
+    color: darkgray;
+}
+
+.notif-close {
+    background: none;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    color: var(--muted);
+    margin-left: auto;
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(40px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+.notification-card.reminder .notif-accent {
+    background: #c9a75dff !important;  /* Your primary/gold color */
+}
+.notification-card.reminder {
+    border-left: 5px solid #C9A75D;
+}
+
+
+/* Sidebar animations */
+#sidebar {
+    transition: transform 0.5s ease-in-out, opacity 0.4s ease, box-shadow 0.3s ease;
+    transform: translateX(0);
+}
+#sidebar.closed {
+    transform: translateX(-260px);
+    opacity: 0;
+}
+
+/* Sidebar hover effect */
+#sidebar:not(.closed) {
+    box-shadow: 4px 0px 18px rgba(0,0,0,0.1);
+}
+
+/* Hamburger button animation */
+#sidebarToggle {
+    transition: transform 0.6s ease;
+}
+#sidebarToggle.rotated {
+    transform: rotate(360deg);
+}
+
+/* Main content adjusts automatically */
+main {
+    transition: margin-left 0.5s ease;
+}
+body[data-sidebar="mini"] main {
+    margin-left: 0 !important;
+}
+body[data-sidebar="expanded"] main {
+    margin-left: 260px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    #sidebar {
+        position: fixed;
+        width: 260px;
+        z-index: 999;
+        transform: translateX(-260px);
+    }
+    #sidebar.closed {
+        transform: translateX(-260px);
+    }
+    #sidebar:not(.closed) {
+        transform: translateX(0);
+    }
+    main {
+        margin-left: 0 !important;
+    }
+}
+input, textarea, select {
+    @apply w-full px-4 py-2 rounded-xl border border-soft bg-light focus:border-primary focus:ring-2 focus:ring-primary/30;
+}
+
+.form-input {
+    @apply w-full px-4 py-2 rounded-xl border border-soft bg-light shadow-sm hover:bg-light/40
+           focus:border-primary focus:ring-2 focus:ring-primary/30 outline-none transition;
+}
+
+.form-label {
+    @apply text-sm font-medium text-dark mb-1 block;
+}
+
+.upload-btn {
+    @apply px-4 py-2 bg-primary text-light rounded-xl shadow hover:bg-dark transition;
+}
+
+.icon-dark { display: none; }
+body.theme-dark .icon-light { display: none; }
+body.theme-dark .icon-dark { display: inline-block; }
+
+</style>
+
+
+<!-- FIXED TOP HEADER -->
+<header class="fixed top-0 left-0 right-0 z-40 bg-light shadow py-3 px-4 flex justify-between items-center h-[64px]">
+    <div class="flex items-center gap-3">
+        <button id="sidebarToggle" class="text-dark hover:opacity-70">
+            <svg width="22" height="22"><path fill="currentColor" d="M3 6h18v2H3zM3 11h18v2H3zM3 16h18v2H3z"/></svg>
+        </button>
+
+        <a href="{% url 'dashboard' %}" class="flex items-center no-underline">
+            <img src="{% static 'core/img/logo.png' %}" class="h-8 w-8"/>
+            <span class="ml-2 text-2xl font-serif font-bold hidden md:inline">Task Manager</span>
+        </a>
+    </div>
+
+    <div class="flex items-center gap-3 flex-1">
+        
+        <!-- Centered search -->
+        <div class="hidden md:flex justify-center flex-1">
+            <input
+                id="globalSearch"
+                class="border border-soft px-5 py-1.5 rounded-full w-full max-w-md
+                    font-sans text-sm focus:outline-none focus:border-primary"
+                placeholder="Search..."
+            />
+        </div>
+        {% if request.session.original_admin %}
+            <a href="{% url 'switch_back' %}"
+            class="flex items-center gap-3 p-2 font-bold rounded-full bg-accent text-soft hover:bg-soft hover:text-accent shadow">
+                <span>Switch Back</span>
+            </a>
+        {% endif %}
+
+        <!-- Right-aligned theme toggle -->
+        <button id="themeToggle" class="relative w-8 h-8">
+            <img id="iconSun" src="{% static 'core/icons/sun.png' %}" 
+                class="absolute inset-0 w-8 h-8 transition-all duration-300 opacity-0 scale-75" />
+            <img id="iconMoon" src="{% static 'core/icons/moon.png' %}" 
+                class="absolute inset-0 w-8 h-8 transition-all duration-300 opacity-0 scale-75" />
+        </button>
+    </div>
+</header>
+
+<!-- SIDEBAR -->
+<aside id="sidebar" class="fixed top-[64px] left-0 w-64 bg-soft h-[calc(100vh-64px)] p-4">
+
+    <nav class="space-y-1">
+        <p class="uppercase text-xs tracking-widest text-dark opacity-60">General</p>
+
+        <a href="{% url 'dashboard' %}" class="flex items-center gap-3 p-2 rounded hover:bg-primary hover:bg-opacity-50">
+            <img src="{% static 'core/icons/home.png' %}" class="icon-light w-5 h-5"/>
+            <img src="{% static 'core/icons/dark-home.png' %}" class="icon-dark w-5 h-5"/>
+            <span>Dashboard</span>
+        </a>
+
+        {% if request.user.is_superuser %}
+        <a href="{% url 'user_list' %}" class="flex items-center gap-3 p-2 rounded hover:bg-primary hover:bg-opacity-50">
+            <img src="{% static 'core/icons/users.png' %}" class="icon-light w-5 h-5"/>
+            <img src="{% static 'core/icons/dark-users.png' %}" class="icon-dark w-5 h-5"/>
+            <span>Users</span>
+        </a>
+        {% endif %}
+
+        <a href="{% url 'task_list' %}" class="flex items-center gap-3 p-2 rounded hover:bg-primary hover:bg-opacity-50">
+            <img src="{% static 'core/icons/task.png' %}" class="icon-light w-5 h-5"/>
+            <img src="{% static 'core/icons/dark-task.png' %}" class="icon-dark w-5 h-5"/>
+            <span>Tasks</span>
+        </a>
+
+        <a href="{% url 'complaint_list' %}" class="flex items-center gap-3 p-2 rounded hover:bg-primary hover:bg-opacity-50">
+            <img src="{% static 'core/icons/complaint.png' %}" class="icon-light w-5 h-5"/>
+            <img src="{% static 'core/icons/dark-complaint.png' %}" class="icon-dark w-5 h-5"/>
+            <span>Complaints</span>
+        </a>
+
+        <a href="{% url 'reminder_list' %}" class="flex items-center gap-3 p-2 rounded hover:bg-primary hover:bg-opacity-50">
+            <img src="{% static 'core/icons/reminder.png' %}" class="icon-light w-5 h-5"/>
+            <img src="{% static 'core/icons/dark-reminder.png' %}" class="icon-dark w-5 h-5"/>
+            <span>Reminders</span>
+        </a>
+        
+        <a href="{% url 'notification_list' %}" class="flex items-center gap-3 p-2 rounded hover:bg-primary hover:bg-opacity-50">
+            <img src="{% static 'core/icons/notification.png' %}" class="icon-light w-5 h-5"/>
+            <img src="{% static 'core/icons/dark-notification.png' %}" class="icon-dark w-5 h-5"/>
+            <span>Notifications</span>
+        </a>
+
+        <a href="{% url 'tag_master' %}" class="flex items-center gap-3 p-2 rounded hover:bg-primary hover:bg-opacity-50">
+            <img src="{% static 'core/icons/tag.png' %}" class="icon-light w-5 h-5"/>
+            <img src="{% static 'core/icons/dark-tag.png' %}" class="icon-dark w-5 h-5"/>
+            <span>Tag Master</span>
+        </a>
+
+        <a href="{% url 'history_log' %}" class="flex items-center gap-3 p-2 rounded hover:bg-primary hover:bg-opacity-50">
+            <img src="{% static 'core/icons/history.png' %}" class="icon-light w-5 h-5"/>
+            <img src="{% static 'core/icons/dark-history.png' %}" class="icon-dark w-5 h-5"/>
+            <span>History Logs</span>
+        </a>        
+
+        <hr class="border-light my-3"/>
+
+        <a href="{% url 'profile' %}" class="flex items-center gap-3 p-2 rounded hover:bg-primary hover:bg-opacity-50">
+            <img src="{% static 'core/icons/profile.png' %}" class="icon-light w-5 h-5"/>
+            <img src="{% static 'core/icons/dark-profile.png' %}" class="icon-dark w-5 h-5"/>
+            <span>Profile</span>
+        </a>
+
+        <a href="{% url 'logout' %}" class="flex items-center gap-3 p-2 rounded hover:bg-danger hover:text-grey">
+            <img src="{% static 'core/icons/logout.png' %}" class="icon-light w-5 h-5"/>
+            <img src="{% static 'core/icons/dark-logout.png' %}" class="icon-dark w-5 h-5"/>
+            <span>Logout</span>
+        </a>
+    </nav>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="pt-[64px] pb-[60px] p-6 min-h-[calc(100vh-64px)]">
+    {% if messages %}
+    <div id="live-notifications">
+        {% for message in messages %}
+        <div class="notification-card {{ message.tags }}">
+            <div class="notif-accent"></div>
+            <div class="notif-content">
+                <div class="notif-header">
+                    <span class="notif-title">{{ message.tags|title }} Notification</span>
+                </div>
+                <p class="notif-message">{{ message }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <script>
+        // Auto-hide after 5s
+        document.querySelectorAll('.notification-card').forEach((card) => {
+            setTimeout(() => card.remove(), 5000);
+        });
+    </script>
+    {% endif %}
+    {% block content %}{% endblock %}
+</main>
+
+<!-- FOOTER -->
+<footer class="bottom-0 p-6 flex items-center justify-center text-xs text-dark bg-light shadow">
+    © 2025 • Task Manager
+</footer>
+<script>
+    function animateCounter(id, endValue, duration = 1200) {
+        let startValue = 0;
+        let increment = endValue / (duration / 16); // approx 60fps
+        const counter = document.getElementById(id);
+
+        function updateCounter() {
+            startValue += increment;
+            if (startValue < endValue) {
+                counter.innerText = Math.floor(startValue) + "%";
+                requestAnimationFrame(updateCounter);
+            } else {
+                counter.innerText = endValue + "%";
+            }
+        }
+        requestAnimationFrame(updateCounter);
+    }
+
+    // Run animation after slight delay to sync with circle animation
+    window.addEventListener("load", function() {
+        animateCounter("taskCounter", {{ task_progress }});
+        animateCounter("complaintCounter", {{ complaint_progress }});
+    });
+</script>
+<audio id="soundReminder" src="{% static 'core/sounds/reminder.mp3' %}" preload="auto"></audio>
+<audio id="soundDefault" src="{% static 'core/sounds/notification.mp3' %}" preload="auto"></audio>
+
+<script>
+(function () {
+    'use strict';
+
+    const body = document.body;
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const themeToggle = document.getElementById('themeToggle');
+    const iconSun = document.getElementById('iconSun');
+    const iconMoon = document.getElementById('iconMoon');
+
+    // 🔊 Play sound for notifications
+    document.querySelectorAll('.notification-card').forEach((msg) => {
+        const soundElement = msg.classList.contains('reminder')
+            ? document.getElementById("soundReminder")
+            : document.getElementById("soundDefault");
+
+        soundElement?.play().catch(() => console.warn("Autoplay blocked"));
+    });
+
+    /* === Sidebar Toggle === */
+    function toggleSidebar() {
+        sidebar.classList.toggle('closed');
+        sidebarToggle.classList.toggle('rotated');
+        const newState = sidebar.classList.contains('closed') ? 'mini' : 'expanded';
+        body.setAttribute('data-sidebar', newState);
+        localStorage.setItem('sidebarState', newState);
+    }
+
+    // 🔁 Load sidebar state
+    const savedSidebar = localStorage.getItem('sidebarState') || 'expanded';
+    body.setAttribute('data-sidebar', savedSidebar);
+    if (savedSidebar === 'mini') {
+        sidebar.classList.add('closed');
+        sidebarToggle.classList.add('rotated');
+    }
+    sidebarToggle?.addEventListener('click', toggleSidebar);
+
+    /* === Theme Handling === */
+    function setIcon(theme) {
+        const showSun = theme === 'dark';
+        iconSun.classList.toggle('opacity-100', showSun);
+        iconSun.classList.toggle('opacity-0', !showSun);
+        iconSun.classList.toggle('scale-100', showSun);
+        iconSun.classList.toggle('scale-75', !showSun);
+
+        iconMoon.classList.toggle('opacity-100', !showSun);
+        iconMoon.classList.toggle('opacity-0', showSun);
+        iconMoon.classList.toggle('scale-100', !showSun);
+        iconMoon.classList.toggle('scale-75', showSun);
+    }
+
+    function applyTheme(theme) {
+        body.classList.toggle('theme-dark', theme === 'dark');
+        body.classList.toggle('theme-light', theme === 'light');
+        setIcon(theme);
+        localStorage.setItem('themeMode', theme);
+    }
+
+    // 🌓 Load saved theme
+    const savedTheme = localStorage.getItem('themeMode') ||
+        (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    applyTheme(savedTheme);
+
+    // 🌗 Toggle theme
+    themeToggle?.addEventListener('click', () => {
+        applyTheme(body.classList.contains('theme-dark') ? 'light' : 'dark');
+    });
+
+    // 🧹 Remove notifications
+    document.querySelectorAll('.notification-card').forEach((card) => {
+        setTimeout(() => card.remove(), 5000);
+    });
+
+    // 🚫 Prevent whitespace issues in chat input
+    const msgBox = document.getElementById('messageInput');
+    msgBox?.addEventListener("input", () => msgBox.value = msgBox.value.trimStart());
+
+    
+})();
+
+</script>
+<script>
+function showToast(type, message) {
+    const card = document.createElement("div");
+    card.className = `notification-card ${type}`;
+    card.innerHTML = `
+        <div class="notif-accent"></div>
+        <div class="notif-content">
+            <div class="notif-title">${type.toUpperCase()}</div>
+            <p class="notif-message">${message}</p>
+        </div>`;
+    document.body.appendChild(card);
+    setTimeout(() => card.remove(), 5000);
+}
+
+setInterval(() => {
+    fetch("{% url 'check_new_notifications' %}")
+        .then(res => res.json())
+        .then(data => {
+            if (data.count > 0) {
+                showToast(`You have ${data.count} new notifications`, "info");
+            }
+        })
+        .catch(err => console.error("Error checking notifications:", err));
+}, 5000);
+
+// ⏰ Check Reminders
+setInterval(() => {
+    fetch("{% url 'check_reminders' %}")
+        .then(res => res.json())
+        .then(data => {
+            if (data.has_due) {
+                data.reminders.forEach(r => {
+                    showToast("reminder", "Reminder: " + r.title);
+                    document.getElementById("soundReminder")?.play();
+                });
+            }
+        });
+}, 5000);
+</script>
+
+
+</body>
+</html>

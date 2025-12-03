@@ -1,0 +1,103 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% block content %}
+
+<div class="max-w-3xl mx-auto mt-6">
+
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-3xl font-serif font-bold text-dark">{{ title|default:"Edit Profile" }}</h2>
+        <a href="{% url 'profile' %}"
+            class="px-5 py-2 bg-dark text-grey rounded-xl hover:bg-primary shadow-sm transition text-sm">
+            ← Back
+        </a>
+    </div>
+
+
+  <form method="post" enctype="multipart/form-data" class="space-y-6">
+    {% csrf_token %}
+
+    <!-- ⭐ Basic Info -->
+    <div class="bg-light border border-soft rounded-xl shadow p-6 space-y-4">
+      <h3 class="font-serif text-2xl font-bold text-center">Basic Information</h3>
+
+      <div>
+        <label class="form-label px-2 py-4">First Name</label><br>
+        <input type="text" name="first_name" value="{{ user_form.first_name.value|default:'' }}" class="form-input w-full px-4 py-2 rounded-xl border border-soft bg-grey focus:border-primary focus:ring-2 focus:ring-primary/30"><br><br>
+      </div>
+
+      <div>
+        <label class="form-label px-2 py-4">Last Name</label><br>
+        <input type="text" name="last_name" value="{{ user_form.last_name.value|default:'' }}" class="form-input w-full px-4 py-2 rounded-xl border border-soft bg-grey focus:border-primary focus:ring-2 focus:ring-primary/30"><br><br>
+      </div>
+
+      <div>
+        <label class="form-label px-2 py-4">Email</label><br>
+        <input type="email" name="email" value="{{ user_form.email.value|default:'' }}" class="form-input w-full px-4 py-2 rounded-xl border border-soft bg-grey focus:border-primary focus:ring-2 focus:ring-primary/30"><br><br>
+      </div>
+    </div>
+
+    <!-- 📞 Profile Info -->
+    <div class="bg-light border border-soft rounded-xl shadow p-6 space-y-4">
+      <h3 class="font-serif text-2xl font-bold text-center">Profile Details</h3>
+
+      <div>
+        <label class="form-label px-2 py-4">Phone</label><br>
+        <input type="text" name="phone" value="{{ profile_form.phone.value|default:'' }}" class="form-input w-full px-4 py-2 rounded-xl border border-soft bg-grey focus:border-primary focus:ring-2 focus:ring-primary/30"><br><br>
+      </div>
+
+      <div>
+        <label class="form-label px-2 py-4">Bio</label><br>
+        <textarea name="bio" class="form-input resize-none w-full px-4 py-2 rounded-xl border border-soft bg-grey resize-none min-h-[130px] focus:border-primary focus:ring-2 focus:ring-primary/30" rows="3">{{ profile_form.bio.value }}</textarea>
+      </div>
+    </div>
+
+    <!-- 🖼️ Avatar -->
+    <div class="bg-light border border-soft rounded-xl shadow p-6 space-y-4">
+      <h3 class="font-serif text-2xl font-bold text-center">Profile Picture</h3>
+
+      <div class="flex justify-center">
+        <img src="{% if user.userprofile.avatar %}{{ user.userprofile.avatar.url }}{% else %}{% static 'core/img/avatar.png' %}{% endif %}"
+             class="w-28 h-28 rounded-xl object-cover shadow border border-soft avatar-preview">
+      </div>
+
+        <div class="text-center">
+        <label class="px-6 py-2 bg-primary text-grey rounded-xl hover:bg-dark shadow transition cursor-pointer">
+            Choose New Avatar
+                <input type="file" name="avatar" hidden>
+            </label>
+        </div>
+    </div>
+    <!-- 💾 Save -->
+    <div class="text-center">
+      <button type="submit"
+        class="px-6 py-2 bg-primary text-grey rounded-xl hover:bg-dark shadow transition">
+        Save Changes
+      </button>
+    </div>
+  </form>
+</div>
+
+
+<style>
+input[type="file"] {
+    @apply text-sm border border-soft px-4 py-2 rounded-xl bg-grey shadow-sm hover:bg-light/40
+           focus:border-primary focus:ring-2 focus:ring-primary/30 focus:outline-none;
+}
+
+.text-danger {
+    color: var(--color-danger);
+}
+</style>
+
+<script>
+// Live Avatar Preview
+document.querySelector('input[name="avatar"]')?.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        document.querySelector('.avatar-preview').src = URL.createObjectURL(file);
+    }
+});
+</script>
+
+{% endblock %}

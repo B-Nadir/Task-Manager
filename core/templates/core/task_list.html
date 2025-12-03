@@ -1,0 +1,133 @@
+{% extends "core/base.html" %}
+{% block content %}
+<div class="space-y-6 mt-4">
+
+  <!-- Header -->
+  <div class="flex justify-between items-center">
+    <div>
+      <h2 class="text-3xl font-bold text-dark font-serif">Tasks</h2>
+      <p class="text-sm text-dark/70">Search and manage tasks</p>
+    </div>
+    <a href="{% url 'create_task' %}" class="px-4 py-2 bg-primary text-grey rounded-lg hover:bg-dark transition">
+      Add New Task
+    </a>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="bg-light border border-soft rounded-xl shadow-lg p-4 mt-4">
+    <form method="get" class="space-y-3">
+      <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+        <input
+          name="search"
+          value="{{ search_query }}"
+          placeholder="Search..."
+          class="col-span-1 md:col-span-2 px-4 py-2 rounded-lg border border-soft focus:outline-none focus:ring-2 focus:ring-primary/30"
+        />
+        <select name="tag" class="col-span-1 md:col-span-1 px-4 py-2 rounded-lg border border-soft focus:outline-none focus:ring-2 focus:ring-primary/30">
+          <option value="">All</option>
+          {% for tag in available_tags %}
+              <option value="{{ tag.id }}" {% if tag.id|stringformat:'s' == tag_filter %}selected{% endif %}>
+                  {{ tag.name }}
+              </option>
+          {% endfor %}
+        </select>
+        <select
+          name="status"
+          class="col-span-1 md:col-span-1 px-4 py-2 rounded-lg border border-soft focus:outline-none focus:ring-2 focus:ring-primary/30"
+        >
+          <option value="">All</option>
+          <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+          <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+        </select>
+        <button class="col-span-1 md:col-span-1 px-4 py-2 bg-primary text-grey rounded-lg hover:bg-dark transition" type="submit">
+          Apply Filters
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Table -->
+  <div class="bg-light rounded-xl border border-soft shadow-lg overflow-hidden">
+    <table class="w-full text-sm">
+      <thead class="bg-soft">
+        <tr>
+          <th class="p-3 text-left">Title</th>
+          <th class="p-3 text-left">Assigned</th>
+          <th class="p-3 text-center">Status</th>
+          <th class="p-3 text-center">Due</th>
+          <th class="p-3 text-right">Tag</th>
+          <th class="p-3 text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for task in tasks %}
+        <tr class="border-b border-soft hover:bg-soft/40 transition">
+          <td class="p-3 space-x-1">
+            <strong>{{ task.title }}</strong>
+          </td>
+
+          <td class="p-3">
+            {% for u in task.assigned_to.all %}
+              <span class="text-dark">{{ u.username }}</span>{% if not forloop.last %}, {% endif %}
+            {% empty %}
+              <span class="text-dark">—</span>
+            {% endfor %}
+          </td>
+
+          <td class="p-3 text-center">
+            {% if task.is_completed %}
+              <span class="text-accent font-medium">Completed</span>
+            {% else %}
+              <span class="text-danger font-medium">Pending</span>
+            {% endif %}
+          </td>
+
+          <td class="p-3 text-center">
+            {{ task.due_date|date:"d M Y, H:i" }}
+          </td>
+
+          <td class="p-3 text-right space-x-1">
+            {% for tag in task.tags.all %}
+              <span class="px-2 py-1 text-xs font-bold rounded-full text-grey"
+                    style="background-color: {{ tag.color }};text-shadow: 0 0 5px dark;">
+                {{ tag.name }}
+              </span>
+            {% empty %}
+              <span class="text-dark text-xs">No Tags</span>
+            {% endfor %}
+          </td>
+
+          <td class="p-3 text-right space-x-1">
+            {% if not task.is_completed %}
+              <a href="{% url 'mark_task_completed' task.id %}"
+                class="px-3 py-1 bg-primary text-grey rounded hover:bg-dark transition text-xs">
+                Mark Completed
+              </a>
+            {% endif %}
+            <a href="{% url 'task_detail' task.id %}" class="px-3 py-1 bg-primary text-grey rounded hover:bg-dark transition text-xs">View</a>
+            <a href="{% url 'edit_task' task.id %}" class="px-3 py-1 bg-accent text-grey rounded hover:bg-dark transition text-xs">Edit</a> 
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" class="p-4 text-center text-dark">No tasks found.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <!-- Pagination -->
+    <div class="p-3 text-center">
+      {% if tasks.has_previous %}
+        <a href="?page={{ tasks.previous_page_number }}"
+          class="px-3 py-1 bg-soft rounded hover:bg-light">Prev</a>
+      {% endif %}
+      <span class="mx-3 text-sm">Page {{ tasks.number|default:"1" }} of {{ tasks.paginator.num_pages|default:"1" }}</span>
+      {% if tasks.has_next %}
+      <a href="?page={{ tasks.next_page_number }}"
+        class="px-3 py-1 bg-soft rounded hover:bg-light">Next</a>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

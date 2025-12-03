@@ -1,0 +1,41 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% block content %}
+
+<div class="max-w-xl mx-auto mt-4 space-y-6">
+
+  <!-- Profile Header -->
+  <div class="bg-light shadow-lg rounded-xl p-6 text-center">
+
+    <!-- Avatar -->
+    <div class="flex justify-center mb-4">
+      <img src="{% if user.userprofile.avatar and user.userprofile.avatar.url %}
+                {{ user.userprofile.avatar.url }}
+            {% else %}
+                {% static 'core/img/avatar.png' %}
+            {% endif %}" 
+        class="w-24 h-24 rounded-full object-cover border border-soft shadow"/>
+    </div>
+
+    <!-- User Info -->
+    <h2 class="text-2xl font-serif font-bold text-dark">{{ user.get_full_name|default:user.username }}</h2>
+        <!-- Contact Info -->
+    <div class="mt-4 text-dark/80 space-y-1">
+      <p><strong>User ID:</strong> {{ user.username }}</p>
+      <p><strong>Email:</strong> {{ user.email|default:"Not provided" }}</p>
+      <p><strong>Phone:</strong> {{ user.userprofile.phone|default:"Not provided" }}</p>
+      <p><strong>Bio:</strong> {{ user.userprofile.bio|default:"No bio available" }}</p>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div class="flex justify-center gap-4">
+    <a href="{% url 'edit_profile' %}" 
+       class="px-4 py-2 bg-primary text-grey rounded-lg shadow hover:bg-dark transition text-sm">
+       Edit Profile
+    </a>
+  </div>
+
+</div>
+
+{% endblock %}

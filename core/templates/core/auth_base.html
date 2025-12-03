@@ -1,0 +1,75 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Authentication{% endblock %} | Task Manager</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#184A78',
+                        accent: '#C9A75D',
+                        light: '#F9F7F3',
+                        dark: '#33322fff',
+                        soft:'#e2cb8b',
+                        danger:'#d44d5b'
+                    },
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <!-- Favicon & Mobile Theme Color -->
+    <link rel="icon" type="image/png" href="{% static 'core/img/logo.png' %}">
+    <meta name="theme-color" content="#0e1a2b">
+</head>
+
+<body class="bg-soft bg-img min-h-screen flex items-center justify-center py-10 font-sans ">
+
+    <div class="w-full max-w-md mx-4 bg-white shadow-[0_4px_30px_rgba(0,0,0,0.35)] rounded-2xl overflow-hidden">
+
+        <!-- Header -->
+        <div class="bg-primary text-center p-8">
+            <div class="w-20 h-20 bg-white rounded-full mx-auto flex items-center justify-center shadow-md">
+                <img src="{% static 'core/img/logo.png' %}" alt="Logo" class="w-12 h-12 object-contain">
+            </div>
+            <h2 class="text-2xl font-semibold text-white mt-4 tracking-wide">
+                {% block heading %}Welcome{% endblock %}
+            </h2>
+            <p class="text-white/80 text-sm mt-1">
+                {% block subtitle %}Please login to continue.{% endblock %}
+            </p>
+        </div>
+
+        <!-- Form Section -->
+        <div class="p-8 space-y-6">
+            <form method="post" autocomplete="off" class="space-y-5">
+                {% csrf_token %}
+                {% block form_fields %}{% endblock %}
+
+                <button type="submit"
+                        class="w-full bg-primary text-white py-2.5 rounded-md font-medium tracking-wide 
+                        hover:bg-accent hover:text-dark transition-all duration-200">
+                    {% block submit_btn %}Submit{% endblock %}
+                </button>
+            </form>
+
+            <!-- Extra Links -->
+            <div class="text-center text-xs text-gray-600">
+                {% block extra_links %}{% endblock %}
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

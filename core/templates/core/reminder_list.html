@@ -1,0 +1,118 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% block content %}
+
+<!-- Page Header -->
+<div class="space-y-6 mt-4">
+  <div class="flex justify-between items-center">
+    <div>
+      <h2 class="text-3xl font-bold text-dark font-serif">Reminders</h2>
+      <p class="text-sm text-dark/70">Upcoming notifications and tasks you must remember</p>
+    </div>
+    <a href="{% url 'create_reminder' %}" class="px-4 py-2 bg-primary text-light rounded-lg hover:bg-dark transition">
+    Create Reminder
+    </a>
+  </div>
+
+    <div class="bg-light border border-soft rounded-xl shadow-lg p-4 mt-4">
+    <form method="get" class="space-y-3">
+
+        <!-- Search Full Width -->
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+            <input
+                type="text"
+                name="search"
+                value="{{ search_query }}"
+                placeholder="Search reminders..."
+                class="col-span-1 md:col-span-2 px-4 py-2 rounded-lg border border-soft focus:outline-none focus:ring-2 focus:ring-primary/30"
+            />
+            
+            <!-- Date Filters + Submit Button -->
+            <input
+                type="date"
+                name="start_date"
+                value="{{ start_date }}"
+                class="col-span-1 md:col-span-1 px-4 py-2 rounded-lg border border-soft focus:outline-none focus:ring-2 focus:ring-primary/30"
+            />
+            <input
+                type="date"
+                name="end_date"
+                value="{{ end_date }}"
+                class="col-span-1 md:col-span-1 px-4 py-2 rounded-lg border border-soft focus:outline-none focus:ring-2 focus:ring-primary/30"
+            />
+            <button
+                type="submit"
+                class="col-span-1 md:col-span-1 px-4 py-2 bg-primary text-light rounded-lg hover:bg-dark transition"
+            >
+                Apply Filters
+            </button>
+        </div>
+
+    </form>
+    </div>
+
+
+  <!-- Reminders Table -->
+  <div class="bg-light rounded-xl shadow-lg border border-soft overflow-hidden">
+      <table class="w-full text-sm">
+          <thead>
+              <tr class="bg-soft">
+                  <th class="p-3 text-left">Reminder</th>
+                  <th class="p-3 text-center">Task</th>
+                  <th class="p-3 text-center">Time</th>
+                  <th class="p-3 text-right">Action</th>
+              </tr>
+          </thead>
+          <tbody>
+              {% for r in reminders %}
+                <tr class="border-b border-soft hover:bg-soft/40 transition">
+                    <!-- Reminder Title -->
+                    <td class="p-3 text-center">
+                        <strong>{{ r.title }}</strong>
+                    </td>
+
+                    <!-- Task Title -->
+                    <td class="p-3 text-center">
+                        {{ r.task.title }}
+                    </td>
+
+                    <!-- Date & Time -->
+                    <td class="p-3 text-center">
+                        {{ r.reminder_time|date:"d M Y, H:i" }}
+                    </td>
+
+                    <!-- Actions -->
+                    <td class="p-3 text-right space-x-2">
+                        <a href="{% url 'edit_reminder' r.id %}"
+                        class="inline-block px-3 py-1 bg-primary text-light rounded-lg hover:bg-dark transition text-xs">
+                            Edit
+                        </a>
+
+                        <form action="{% url 'delete_reminder' r.id %}" method="post" class="inline">
+                            {% csrf_token %}
+                            <button type="submit"
+                                    class="px-3 py-1 bg-danger text-light rounded-lg hover:bg-dark transition text-xs"
+                                    onclick="return confirm('Are you sure you want to delete this reminder?')">
+                                Delete
+                            </button>
+                        </form>
+                    </td>
+                </tr>                            
+              {% endfor %}
+          </tbody>
+      </table>
+      <!-- Pagination -->
+      <div class="p-3 text-center">
+            {% if reminders.has_previous %}
+                <a href="?page={{ reminders.previous_page_number }}"
+                class="px-3 py-1 bg-soft rounded hover:bg-light">Prev</a>
+            {% endif %}
+            <span class="mx-3 text-sm">Page {{ reminders.number|default:"1" }} of {{ reminders.paginator.num_pages|default:"1" }}</span>
+            {% if reminders.has_next %}
+                <a href="?page={{ reminders.next_page_number }}"
+                    class="px-3 py-1 bg-soft rounded hover:bg-light">Next</a>
+            {% endif %}
+      </div>
+  </div>
+</div>
+{% endblock %}

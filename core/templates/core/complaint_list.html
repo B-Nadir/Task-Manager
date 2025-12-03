@@ -1,0 +1,134 @@
+{% extends "core/base.html" %}
+{% block content %}
+<div class="space-y-6 mt-4">
+
+  <div class="flex justify-between items-center">
+    <div>
+      <h2 class="text-3xl font-bold font-serif text-dark">Complaints</h2>
+      <p class="text-sm text-dark/70">Submit and review complaints</p>
+    </div>
+    <a href="{% url 'create_complaint' %}" class="px-4 py-2 bg-primary text-grey rounded-lg hover:bg-dark transition">
+      New Complaint
+    </a>
+  </div>
+
+  <div class="bg-light border border-soft rounded-xl shadow-lg p-4 mt-4">
+    <form method="get" class="space-y-3">
+      <div class="grid grid-cols-1 md:grid-cols-6 gap-3">
+        <input
+          name="search"
+          value="{{ search_query }}"
+          placeholder="Search complaints..."
+          class="col-span-1 md:col-span-2 px-4 py-2 rounded-lg border border-soft focus:outline-none focus:ring-2 focus:ring-primary/30"
+        />
+        
+        <select name="tag" class="col-span-1 md:col-span-1 px-4 py-2 rounded-lg border border-soft focus:outline-none focus:ring-2 focus:ring-primary/30">
+            <option value="">All Tags</option>
+            {% for tag in available_tags %}
+                <option value="{{ tag.id }}" {% if tag.id|stringformat:'s' == tag_filter %}selected{% endif %}>
+                    {{ tag.name }}
+                </option>
+            {% endfor %}
+        </select>
+        
+        <select name="complaint_type" class="col-span-1 md:col-span-1 px-4 py-2 rounded-lg border border-soft focus:outline-none focus:ring-2 focus:ring-primary/30">
+            <option value="">All Types</option>
+            {% for code, label in complaint_types %}
+                <option value="{{ code }}" {% if code == type_filter %}selected{% endif %}>
+                    {{ label }}
+                </option>
+            {% endfor %}
+        </select>     
+
+        <select
+          name="status"
+          class="col-span-1 md:col-span-1 px-4 py-2 rounded-lg border border-soft focus:outline-none focus:ring-2 focus:ring-primary/30"
+        >
+          <option value="">Select Status</option>
+          <option value="Pending" {% if status_filter == 'Pending' %}selected{% endif %}>Pending</option>
+          <option value="Resolved" {% if status_filter == 'Resolved' %}selected{% endif %}>Resolved</option>
+        </select>
+        
+        <button class="col-span-1 md:col-span-1 px-4 py-2 bg-primary text-grey rounded-lg hover:bg-dark transition" type="submit">
+          Apply Filters
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="bg-light rounded-xl border border-soft shadow-lg overflow-hidden">
+    <table class="w-full text-sm">
+      <thead class="bg-soft">
+        <tr>
+          <th class="p-3 text-left">Subject</th>
+          <th class="p-3 text-center">Status</th>
+          <th class="p-3 text-left">Type</th>
+          <th class="p-3 text-center">Created</th>
+          <th class="p-3 text-right">Tag</th>
+          <th class="p-3 text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in complaints %}
+        <tr class="border-b border-soft hover:bg-soft/40 transition">
+          <td class="p-3">
+            <strong>{{ c.subject }}</strong>
+          </td>
+          <td class="p-3 text-center">
+            {% if c.status == 'Pending' %}
+              <span class="text-danger font-medium">Pending</span>
+            {% else %}
+              <span class="text-accent font-medium">Resolved</span>
+            {% endif %}
+          </td>
+          <td class="p-3">{{ c.get_complaint_type_display }}</td>
+          <td class="p-3 text-center">{{ c.created_at|date:"d M Y" }}</td>
+          <td class="p-3 space-x-1">
+            {% for tag in c.tags.all %}
+              <span class="px-2 py-1 text-xs rounded-full text-grey"
+                    style="background-color: {{ tag.color }};">
+                {{ tag.name }}
+              </span>
+            {% empty %}
+              <span class="text-dark/30 text-xs">No Tags</span>
+            {% endfor %}
+          </td>
+          <td class="p-3 text-right space-x-2">
+            <a href="{% url 'complaint_detail' c.id %}" class="px-3 py-1 bg-primary text-grey rounded hover:bg-dark transition text-xs">
+              View
+            </a>
+
+            {% if c.status != 'Resolved' %}
+              <a href="{% url 'resolve_complaint' c.id %}"
+                class="px-3 py-1 bg-primary text-grey rounded hover:bg-dark transition text-xs">
+                Mark Resolved
+              </a>
+            {% endif %}
+            <a href="{% url 'edit_complaint' c.id %}" class="px-3 py-1 bg-accent text-grey rounded hover:bg-dark transition text-xs">
+              Edit
+            </a>
+           
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" class="p-4 text-center text-dark/60">No complaints found.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div class="p-3 text-center">
+      {% if complaints.has_previous %}
+        <a href="?page={{ complaints.previous_page_number }}"
+          class="px-3 py-1 bg-soft rounded hover:bg-light">Prev</a>
+      {% endif %}
+      <span class="mx-3 text-sm">Page {{ complaints.number|default:"1" }} of {{ complaints.paginator.num_pages|default:"1" }}</span>
+      {% if complaints.has_next %}
+      <a href="?page={{ complaints.next_page_number }}"
+        class="px-3 py-1 bg-soft rounded hover:bg-light">Next</a>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

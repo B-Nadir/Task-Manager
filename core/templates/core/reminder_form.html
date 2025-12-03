@@ -1,0 +1,82 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% block content %}
+
+<div class="max-w-xl mx-auto mt-6">
+
+  <!-- Header Section -->
+  <div class="flex justify-between items-center">
+    <div>
+      <h2 class="text-3xl font-serif font-bold text-dark">
+        {{ title|default:"Create Reminder" }}
+      </h2>
+      <p class="text-sm text-dark/70">Set a reminder for a task</p>
+    </div>
+    <a href="{% url 'reminder_list' %}"
+       class="px-6 py-2 bg-primary text-grey rounded-lg hover:bg-dark shadow transition">
+      ← Back
+    </a>
+  </div>
+
+  <!-- Form Card -->
+  <div class="bg-light border border-soft rounded-xl shadow p-6 mt-6">
+    <form method="post" class="space-y-6">
+      {% csrf_token %}
+
+      {% if form.errors %}
+      <div class="bg-danger/10 border-l-4 border-danger px-4 py-2 rounded mb-4">
+        <p class="text-danger font-medium">Please fix the following errors:</p>
+      </div>
+      {% endif %}
+
+      <!-- Reminder Title -->
+      <div>
+        <label class="text-sm font-medium text-dark">Reminder Title</label>
+        {{ form.title }}
+        {% if form.title.errors %}
+          <p class="text-danger text-sm">{{ form.title.errors }}</p>
+        {% endif %}
+      </div>
+
+      <!-- Task Select -->
+      <div>
+        <label class="text-sm font-medium text-dark">Select Task</label>
+        <select name="task" class="w-full px-4 py-2 bg-grey border border-soft rounded-lg shadow-sm focus:outline-none focus:border-primary">
+          <option disabled selected>Choose a task</option>
+          {% for option in form.task.field.queryset %}
+            <option value="{{ option.id }}" {% if form.instance.task and form.instance.task.id == option.id %}selected{% endif %}>
+              {{ option.title }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Reminder Time -->
+      <div>
+        <label class="text-sm font-medium text-dark">Reminder Time</label>
+        {{ form.reminder_time }}
+        {% if form.reminder_time.errors %}
+          <p class="text-danger text-sm">{{ form.reminder_time.errors }}</p>
+        {% endif %}
+      </div>
+
+      <!-- Recurring Checkbox -->
+      <div class="flex items-center space-x-2">
+        <input type="checkbox" name="recurring"
+               class="h-4 w-4 text-primary rounded focus:ring-primary">
+        <label class="text-sm">Repeat daily</label>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="text-right">
+        <button type="submit" class="px-6 py-2 bg-primary text-grey rounded-lg hover:bg-dark transition shadow">
+          Save Reminder
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+</div>
+
+{% endblock %}

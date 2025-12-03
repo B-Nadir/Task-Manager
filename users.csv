@@ -1,0 +1,4 @@
+﻿Full Name,First Name,Last Name,Login ID,Password,Email Address,Phone No.,Role
+Admin User,Admin,User,admin_01,AdminPass123!,admin@example.com,1234567890,Admin
+Regular User,Regular,User,user_01,UserPass123!,user@example.com,0987654321,User
+John Doe,John,Doe,john_doe,SecurePass456,john.doe@example.com,1122334455,User

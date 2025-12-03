@@ -1,0 +1,76 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% block content %}
+
+<div class="max-w-3xl mx-auto mt-6">
+
+  <!-- Back Button -->
+  <a href="{% url 'complaint_list' %}"
+     class="inline-block mb-4 px-4 py-2 rounded-lg bg-primary text-grey hover:bg-dark transition shadow">
+     ← Complaint List
+  </a>
+
+  <!-- Page Header -->
+  <div class="text-center mb-8">
+    <h2 class="text-3xl font-serif font-bold text-dark">{{ title|default:"Submit Complaint" }}</h2>
+    <p class="text-dark/70 text-sm">Describe the issue clearly</p>
+  </div>
+
+  <form method="post" enctype="multipart/form-data" class="space-y-6">
+    {% csrf_token %}
+
+    <!-- Basic Details -->
+    <div class="bg-light border border-soft rounded-xl shadow p-6 space-y-4">
+      <h3 class="font-serif text-lg font-bold text-center">Basic Details</h3>
+      {{ form.subject }}
+      {{ form.message }}
+    </div>
+
+    <!-- Category -->
+    <div class="bg-light border border-soft rounded-xl shadow p-6 space-y-4">
+      <h3 class="font-serif text-lg font-bold text-center">Complaint Type</h3>
+      {{ form.complaint_type }}
+    </div>
+
+        <!-- Tags -->
+    <div class="bg-light border border-soft rounded-xl shadow p-6 space-y-4">
+      <h3 class="font-serif text-lg font-bold text-center">Tags</h3>
+      <div x-data="{ open:false, selected: [] }" class="relative">
+        <button type="button" @click="open = !open"
+          class="w-full px-4 py-2 rounded-xl border border-soft bg-grey shadow-sm text-left  flex justify-between">
+          <span>Select Tags</span>
+          <span x-text="selected.length ? '(' + selected.length + ' selected)' : '▼'"></span>
+        </button>
+        <div x-show="open" @click.outside="open=false"
+          class="absolute left-0 w-full mt-2 bg-grey border border-soft rounded-xl shadow p-3 max-h-40 overflow-y-auto z-10">
+          {% for checkbox in form.tags %}
+            <label class="flex items-center space-x-2">
+              <input type="checkbox" name="{{ checkbox.data.name }}" value="{{ checkbox.data.value }}"
+                {% if checkbox.data.selected %}checked{% endif %}
+                class="h-4 w-4 rounded border-soft text-primary checked:bg-primary checked:border-primary" />
+              <span>{{ checkbox.choice_label }}</span>
+            </label>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Attachments -->
+    <div class="bg-light border border-soft rounded-xl shadow p-6 text-center">
+      <h3 class="font-serif text-lg font-bold">Attachments</h3>
+      <input type="file" name="attachments" multiple
+        class="block w-full file:cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-xl file:bg-primary file:text-grey hover:file:bg-dark transition">
+    </div>
+
+    <!-- Submit Button -->
+    <div class="text-center pt-4">
+      <button type="submit"
+        class="px-6 py-2 bg-primary text-grey rounded-xl hover:bg-dark shadow-md transition">
+        {{ title|default:"Submit" }}
+      </button>
+    </div>
+
+  </form>
+</div>
+
+{% endblock %}

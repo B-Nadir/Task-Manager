@@ -1,0 +1,86 @@
+{% extends "core/base.html" %}
+{% block content %}
+<div class="space-y-6 mt-4">
+
+  <!-- Header -->
+  <div class="flex justify-between items-center">
+    <div>
+      <h2 class="text-3xl font-bold text-dark font-serif">Users</h2>
+      <p class="text-sm text-dark">View and manage users</p>
+    </div>
+  </div>
+
+  <!-- Filter / Search Bar -->
+  <div class="bg-light border border-soft rounded-xl shadow-lg p-4">
+    <form method="get" class="flex flex-wrap gap-4">
+      <input
+        name="search"
+        value="{{ search_query }}"
+        placeholder="Search users..."
+        class="flex-1 border border-soft px-3 py-2 rounded-lg focus:border-primary focus:outline-none"
+      />
+      <button
+        type="submit"
+        class="px-4 py-2 bg-primary text-grey rounded-lg hover:bg-dark transition">
+        Search
+      </button>
+    </form>
+  </div>
+
+  <!-- Users Table -->
+  <div class="bg-light border border-soft rounded-xl shadow-lg overflow-hidden">
+    <table class="w-full text-sm">
+      <thead class="bg-soft">
+        <tr>
+          <th class="p-3 text-left">User ID</th>
+          <th class="p-3 text-left">Name</th>
+          <th class="p-3 text-left">Email</th>
+          <th class="p-3 text-left">Role</th>
+          <th class="p-3 text-center">Last Login</th>
+          <th class="p-3 text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in users %}
+        <tr class="border-b border-soft hover:bg-soft/40 transition">
+          <td class="p-3 font-medium">
+            {{ user.username }}
+          </td>
+        <td class="p-3">
+          {% if user.first_name or user.last_name %}
+            {{ user.first_name }} {{ user.last_name }}
+          {% else %}
+            <span class="text-dark">—</span>
+          {% endif %}
+        </td>
+          <td class="p-3">
+            {{ user.email|default:"—" }}
+          </td>
+          <td class="p-3">
+            {{ user.userprofile.role|default:"User" }}
+          </td>
+          <td class="p-3 text-center">
+            {{ user.last_login|date:"d M Y, H:i"|default:"—" }}
+          </td>
+            <td class="p-3 text-center">
+            {% if request.user.is_superuser and not user.is_superuser %}
+                <a href="{% url 'login_as_user' user.id %}"
+                class="px-3 py-1 text-xs bg-accent text-grey rounded hover:bg-dark transition">
+                Login As
+                </a>
+            {% else %}
+                <span class="text-xs text-dark">—</span>
+            {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" class="p-4 text-center text-dark">No users found.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
+{% endblock %}

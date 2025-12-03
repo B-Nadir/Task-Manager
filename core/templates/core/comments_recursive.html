@@ -1,0 +1,63 @@
+{% load static %}
+
+<div style="margin-bottom:12px">
+  <div style="display:flex;gap:10px;align-items:flex-start">
+    
+    <!-- Avatar -->
+    <img src="{% static 'core/img/avatar.png' %}" alt="avatar"
+         style="height:36px;width:36px;border-radius:8px;object-fit:cover">
+
+    <div style="flex:1">
+
+      <strong>{{ comments.user.get_full_name|default:comments.user.username }}</strong>
+      <div style="font-size:.85rem;color:#666;">
+        {{ comments.timestamp|date:"d M Y, H:i" }}
+      </div>
+
+      <!-- Content -->
+      <div style="margin-top:6px">{{ comments.content|linebreaksbr }}</div>
+
+      <!-- Reply Action -->
+      <div style="margin-top:8px;">
+        <a href="#" class="reply-toggle" data-id="{{ comments.id }}" style="color:#777;">
+          Reply
+        </a>
+      </div>
+
+      <!-- Reply Form -->
+      <div id="reply-form-{{ comments.id }}" style="display:none;margin-top:8px">
+        <form method="post" action="">
+          {% csrf_token %}
+          <textarea name="content" rows="2"
+                    style="width:100%;padding:8px;border-radius:8px;border:1px solid #ccc;"></textarea>
+          <input type="hidden" name="parent_id" value="{{ comments.id }}">
+          <button type="submit text-grey"
+                  style="margin-top:6px;padding:4px 10px;border:none;background:#C9A75D;border-radius:6px;">
+            Reply
+          </button>
+        </form>
+      </div>
+
+      <!-- Render Replies -->
+      {% if comments.replies.exists %}
+        <div style="margin-left:44px;margin-top:12px">
+          {% for reply in comments.replies.all %}
+            {% include "core/comments_recursive.html" with comments=reply %}
+          {% endfor %}
+        </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+
+<script>
+  // Toggle reply form
+  document.querySelectorAll('.reply-toggle').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      const form = document.getElementById('reply-form-' + this.dataset.id);
+      if (form) form.style.display = (form.style.display === 'block') ? 'none' : 'block';
+    });
+  });
+</script>

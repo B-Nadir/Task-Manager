@@ -1,0 +1,62 @@
+.env# ==========================
+# SECURITY (CRITICAL)
+# ==========================
+.env
+.env.local
+secrets.py
+
+# ==========================
+# DATABASE
+# ==========================
+# Never commit your local database
+db.sqlite3
+db.sqlite3-journal
+
+# ==========================
+# PYTHON & DJANGO INTERNALS
+# ==========================
+__pycache__/
+*.py[cod]
+*$py.class
+
+# ==========================
+# STATIC & MEDIA FILES
+# ==========================
+# 'media' is for user-uploaded files (avatars, attachments) - Do not commit these
+media/
+
+# 'staticfiles' is where collectstatic puts files for production - Do not commit
+staticfiles/
+
+# ==========================
+# VIRTUAL ENVIRONMENT
+# ==========================
+# Never commit your libraries
+venv/
+env/
+.venv/
+Lib/
+Scripts/
+
+# ==========================
+# OS & EDITOR JUNK
+# ==========================
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Mac (Just in case)
+.DS_Store
+
+# VS Code / PyCharm
+.vscode/
+.idea/
+
+# ==========================
+# BACKUPS & ZIPS
+# ==========================
+*.zip
+*.rar
+*.bak
+*.log
