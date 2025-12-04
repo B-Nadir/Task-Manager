@@ -517,6 +517,20 @@ body.theme-dark .icon-dark { display: inline-block; }
         localStorage.setItem('sidebarState', newState);
     }
 
+    /* === Close Sidebar when clicking outside (Mobile/Tablet) === */
+    document.addEventListener('click', (e) => {
+       
+        if (window.innerWidth <= 1024) {
+            const isClickInsideSidebar = sidebar.contains(e.target);
+            const isClickOnToggle = sidebarToggle.contains(e.target);
+            const isSidebarOpen = !sidebar.classList.contains('closed');
+
+            if (isSidebarOpen && !isClickInsideSidebar && !isClickOnToggle) {
+                toggleSidebar();
+            }
+        }
+    });
+    
     // 🔁 Load sidebar state
     const savedSidebar = localStorage.getItem('sidebarState') || 'expanded';
     body.setAttribute('data-sidebar', savedSidebar);
